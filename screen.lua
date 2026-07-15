@@ -88,18 +88,13 @@ function BalanceScreen:buildLayout()
         and math.max(math.floor(sw * 0.38), 100)
         or  math.floor(sw * 0.9)
 
-    local top_buttons = ButtonTable:new{
-        shrink_unneeded_width = true,
-        width   = btn_width,
-        buttons = {{
-            { text = _("New"),    callback = function() self:onNewGame() end },
-            { id = "preset_btn", text = self:getPresetButtonText(),
-              callback = function() self:openPresetMenu() end },
+    local title_bar = self:buildTitleBar(_("Balance"), function()
+        return {
+            { text = _("New game"),               callback = function() self:onNewGame() end },
+            { text = self:getPresetButtonText(),  callback = function() self:openPresetMenu() end },
             self:makeRulesButtonConfig(GAME_RULES_EN, GAME_RULES_FR),
-            self:makeCloseButtonConfig(),
-        }},
-    }
-    self.preset_btn = top_buttons:getButtonById("preset_btn")
+        }
+    end)
 
     -- Ball buttons (cycle through: none / L / R)
     local ball_btns = self:_buildBallButtons(btn_width)
@@ -142,44 +137,28 @@ function BalanceScreen:buildLayout()
         self.board_widget,
     }
 
+    local footer = VerticalGroup:new{
+        align = "center",
+        ball_btns,
+        VerticalSpan:new{ width = Size.span.vertical_default },
+        action_buttons,
+        VerticalSpan:new{ width = Size.span.vertical_default },
+        self.hist_text,
+        VerticalSpan:new{ width = Size.span.vertical_default },
+        self.status_text,
+    }
+
     if is_landscape then
-        local right_panel = VerticalGroup:new{
-            align = "center",
-            top_buttons,
-            VerticalSpan:new{ width = Size.span.vertical_default },
-            ball_btns,
-            VerticalSpan:new{ width = Size.span.vertical_default },
-            action_buttons,
-            VerticalSpan:new{ width = Size.span.vertical_default },
-            self.hist_text,
-            VerticalSpan:new{ width = Size.span.vertical_default },
-            self.status_text,
-        }
-        self.layout = HorizontalGroup:new{
+        local content = HorizontalGroup:new{
             align  = "center",
             board_frame,
             HorizontalSpan:new{ width = Size.span.horizontal_default },
-            right_panel,
+            footer,
         }
+        self:buildLandscapeLayout(title_bar, content)
     else
-        self.layout = VerticalGroup:new{
-            align = "center",
-            VerticalSpan:new{ width = Size.span.vertical_large },
-            top_buttons,
-            VerticalSpan:new{ width = Size.span.vertical_default },
-            board_frame,
-            VerticalSpan:new{ width = Size.span.vertical_default },
-            ball_btns,
-            VerticalSpan:new{ width = Size.span.vertical_default },
-            action_buttons,
-            VerticalSpan:new{ width = Size.span.vertical_default },
-            self.hist_text,
-            VerticalSpan:new{ width = Size.span.vertical_default },
-            self.status_text,
-            VerticalSpan:new{ width = Size.span.vertical_large },
-        }
+        self:buildPortraitLayout(title_bar, board_frame, footer)
     end
-    self[1] = self.layout
     self:updateStatus()
 end
 
