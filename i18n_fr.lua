@@ -1,0 +1,18 @@
+return {
+    ["Weigh"]       = { fr = "Peser" },
+    ["Clear Pans"]  = { fr = "Vider les plateaux" },
+    ["Heavier"]                            = { fr = "Plus lourd" },
+    ["Lighter"]                            = { fr = "Plus léger" },
+    ["heavier"]                            = { fr = "plus lourd" },
+    ["lighter"]                            = { fr = "plus léger" },
+    ["Heavier or lighter?"]                = { fr = "Plus lourd ou plus léger ?" },
+    ["Which ball is the odd one?"]         = { fr = "Quelle bille est la différente ?" },
+    ["No weighings yet"]                   = { fr = "Aucune pesée pour l'instant" },
+    ["No weighings remaining — make your guess!"] = { fr = "Plus de pesées — faites votre choix !" },
+    ["Weighings: %1/%2"]                   = { fr = "Pesées : %1/%2" },
+    ["Correct! Ball %1 was %2."]           = { fr = "Correct ! La bille %1 était %2." },
+    ["Wrong! Ball %1 was %2."]             = { fr = "Faux ! La bille %1 était %2." },
+    ["Correct! Weighings: %1/%2"]          = { fr = "Correct ! Pesées : %1/%2" },
+    ["Game over. Odd ball was #%1 (%2)."]  = { fr = "Partie terminée. La bille différente était la n°%1 (%2)." },
+    ["Place balls on the pans first."]     = { fr = "Placez d'abord les billes sur les plateaux." },
+}
