@@ -15,4 +15,9 @@ return {
     ["Correct! Weighings: %1/%2"]          = { fr = "Correct ! Pesées : %1/%2" },
     ["Game over. Odd ball was #%1 (%2)."]  = { fr = "Partie terminée. La bille différente était la n°%1 (%2)." },
     ["Place balls on the pans first."]     = { fr = "Placez d'abord les billes sur les plateaux." },
+    ["Guess"]       = { fr = "Deviner" },
+    [" | L:%1 R:%2"]                 = { fr = " | G:%1 D:%2" },
+    ["Balance"]                             = { fr = "Balance" },
+    ["Ball "]                               = { fr = "Bille " },
+    ["Logical weighing puzzle"]             = { fr = "Casse-tête logique de pesée" },
 }
