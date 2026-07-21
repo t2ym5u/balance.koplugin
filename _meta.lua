@@ -3,5 +3,5 @@ return {
     name        = "balance",
     fullname    = _("Balance"),
     description = _("Logical weighing puzzle"),
-    version     = "1.1.3",
+    version     = "1.1.4",
 }
