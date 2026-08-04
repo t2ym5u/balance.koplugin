@@ -137,6 +137,8 @@ function BalanceScreen:buildLayout()
         self.board_widget,
     }
 
+    self.status_text:setMaxWidth(btn_width)
+
     local footer = VerticalGroup:new{
         align = "center",
         ball_btns,
