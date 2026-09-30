@@ -5,7 +5,7 @@
 
 ## Screenshot
 
-*(Screenshot to be added.)*
+![Screenshot](images/balance.png)
 
 ## Rules
 
