@@ -23,13 +23,11 @@ One ball in a set is heavier or lighter than the rest. Use a balance scale to id
 
 | Action | Control |
 |--------|---------|
-| Assign a ball to left/right pan | Tap the ball button (cycles: none → L → R → none) |
+| Put a ball on a pan / take it back | Tap the ball, on the scale or below it (cycles: off the scale → left pan → right pan → off the scale) |
 | Weigh the current setup | Tap **Weigh** |
 | Clear both pans | Tap **Clear Pans** |
 | Submit your guess | Tap **Guess** |
-| New game | Tap **New** |
-| Change difficulty | Tap difficulty button |
-| Show rules | Tap **Rules** |
+| New game, difficulty, rules | Menu (☰) in the title bar |
 
 ## Settings
 

@@ -124,4 +124,32 @@ describe("BalanceBoard", function()
             assert.is_false(b:load({}))
         end)
     end)
+
+    describe("currentResult", function()
+        it("is nil before the first weighing", function()
+            local b = Board:new()
+            assert.is_nil(b:currentResult())
+        end)
+
+        it("reports the last result while the pans are unchanged", function()
+            local b = Board:new()
+            b.odd_ball, b.odd_heavier = 1, true
+            b:cycleBall(1)                 -- left
+            b:cycleBall(2); b:cycleBall(2) -- right
+            b:weigh()
+            assert.are.equal("L", b:currentResult())
+        end)
+
+        it("goes nil once a ball is moved, and back when it returns", function()
+            local b = Board:new()
+            b.odd_ball, b.odd_heavier = 1, true
+            b:cycleBall(1)
+            b:cycleBall(2); b:cycleBall(2)
+            b:weigh()
+            b:cycleBall(3)
+            assert.is_nil(b:currentResult())
+            b:cycleBall(3); b:cycleBall(3) -- 3 back off the scale
+            assert.are.equal("L", b:currentResult())
+        end)
+    end)
 end)
