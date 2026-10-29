@@ -6,6 +6,25 @@ Reconstructed from this repository's git history: each release lists the
 feature and fix commits it carried. Version bumps, screenshot additions
 and CI syncs are left out.
 
+## [1.2.0] - 2026-10-29
+
+### Changed
+- Redesigned play screen. The scale is drawn properly (fulcrum, hanging
+  pans, a beam that tilts towards the heavier side) and the balls are round,
+  numbered and tapped directly, on the scale or in the "Off the scale" tray
+  below it, instead of through a row of tiny `L:3`/`R:5` buttons. A ball on
+  a pan leaves a faint outline in its tray slot, so slots never move.
+- The beam only stays tilted while the pans hold exactly what was weighed;
+  moving a ball levels it, so it never shows a result for an unweighed set-up.
+- The weighing log is a table with one row per allowed weighing (unused rows
+  greyed) and a small tilted-scale pictogram per result, instead of one long
+  line that ran off the screen after two weighings.
+- Once the game ends, the odd ball is shown filled in black.
+
+### Fixed
+- The log showed `[1,2,3] < [4,5,6]` when the *left* pan was heavier.
+
+
 ## [1.1.14] - 2026-10-07
 
 ### Fixed

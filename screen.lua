@@ -9,13 +9,9 @@ end
 
 local ButtonTable     = require("ui/widget/buttontable")
 local Device          = require("device")
-local Font            = require("ui/font")
-local FrameContainer  = require("ui/widget/container/framecontainer")
 local HorizontalGroup = require("ui/widget/horizontalgroup")
 local HorizontalSpan  = require("ui/widget/horizontalspan")
-local InputDialog     = require("ui/widget/inputdialog")
 local Size            = require("ui/size")
-local TextWidget      = require("ui/widget/textwidget")
 local UIManager       = require("ui/uimanager")
 local VerticalGroup   = require("ui/widget/verticalgroup")
 local VerticalSpan    = require("ui/widget/verticalspan")
@@ -81,12 +77,9 @@ end
 
 function BalanceScreen:buildLayout()
     local sw           = DeviceScreen:getWidth()
-    local sh = DeviceScreen:getHeight()
+    local sh           = DeviceScreen:getHeight()
     local is_landscape = self:isLandscape()
-
-    local btn_width = is_landscape
-        and math.max(math.floor(sw * 0.38), 100)
-        or  math.floor(sw * 0.9)
+    local pad          = Size.padding.large
 
     local title_bar = self:buildTitleBar(_("Balance"), function()
         return {
@@ -96,13 +89,10 @@ function BalanceScreen:buildLayout()
         }
     end)
 
-    -- Ball buttons (cycle through: none / L / R)
-    local ball_btns = self:_buildBallButtons(btn_width)
+    local footer_w = is_landscape and math.floor(sw * 0.34) or (sw - 2 * pad)
 
-    -- Action buttons
     local action_buttons = ButtonTable:new{
-        shrink_unneeded_width = true,
-        width   = btn_width,
+        width   = footer_w,
         buttons = {{
             { text = _("Weigh"),      callback = function() self:onWeigh() end },
             { text = _("Clear Pans"), callback = function() self:onClearPans() end },
@@ -110,120 +100,46 @@ function BalanceScreen:buildLayout()
         }},
     }
 
-    -- History text
-    local hist_sz   = math.max(8, math.floor(sh * 0.025))
-    self.hist_face  = Font:getFace("smallinfofont", hist_sz)
-    self.hist_text  = TextWidget:new{
-        text = self:_buildHistoryText(),
-        face = self.hist_face,
-    }
-
-    local margin      = Size.margin.default
-    local padding     = Size.padding.large
-    local frame_extra = (padding + margin) * 2
-
-    local board_max_w = is_landscape and math.floor(sw * 0.50) or (sw - frame_extra)
-    local board_max_h = math.floor(sh * 0.25)
-
-    self.board_widget = BalanceBoardWidget:new{
-        board      = self.board,
-        max_width  = board_max_w,
-        max_height = board_max_h,
-    }
-
-    local board_frame = FrameContainer:new{
-        padding = padding,
-        margin  = margin,
-        self.board_widget,
-    }
-
-    self.status_text:setMaxWidth(btn_width)
+    self.status_text:setMaxWidth(footer_w)
 
     local footer = VerticalGroup:new{
         align = "center",
-        ball_btns,
-        VerticalSpan:new{ width = Size.span.vertical_default },
-        action_buttons,
-        VerticalSpan:new{ width = Size.span.vertical_default },
-        self.hist_text,
-        VerticalSpan:new{ width = Size.span.vertical_default },
         self.status_text,
+        VerticalSpan:new{ width = Size.span.vertical_large },
+        action_buttons,
+        VerticalSpan:new{ width = pad },
+    }
+
+    -- The board takes every pixel the title bar and footer leave over.
+    local avail_h = sh - title_bar:getSize().h
+    local board_w, board_h
+    if is_landscape then
+        board_w = sw - footer_w - 3 * pad
+        board_h = avail_h - 2 * pad
+    else
+        board_w = sw - 2 * pad
+        board_h = avail_h - footer:getSize().h - 2 * pad
+    end
+
+    self.board_widget = BalanceBoardWidget:new{
+        board       = self.board,
+        max_width   = board_w,
+        max_height  = board_h,
+        on_ball_tap = function(ball) self:onBallTap(ball) end,
     }
 
     if is_landscape then
         local content = HorizontalGroup:new{
             align  = "center",
-            board_frame,
-            HorizontalSpan:new{ width = Size.span.horizontal_default },
+            self.board_widget,
+            HorizontalSpan:new{ width = pad },
             footer,
         }
         self:buildLandscapeLayout(title_bar, content)
     else
-        self:buildPortraitLayout(title_bar, board_frame, footer)
+        self:buildPortraitLayout(title_bar, self.board_widget, footer)
     end
     self:updateStatus()
-end
-
-function BalanceScreen:_buildBallButtons(width)
-    local board = self.board
-    local rows  = {}
-    local row   = {}
-    local max_per_row = 8
-    for i = 1, board.num_balls do
-        row[#row + 1] = {
-            id       = "ball_" .. i,
-            text     = self:_ballLabel(i),
-            callback = function()
-                board:cycleBall(i)
-                self:_refreshBallButtons()
-                self.board_widget:refresh()
-                self:updateStatus()
-                self.plugin:saveState(self.board:serialize())
-            end,
-        }
-        if #row >= max_per_row or i == board.num_balls then
-            rows[#rows + 1] = row
-            row = {}
-        end
-    end
-    self.ball_button_table = ButtonTable:new{
-        shrink_unneeded_width = true,
-        width   = width,
-        buttons = rows,
-    }
-    -- cache button refs
-    self.ball_buttons = {}
-    for i = 1, board.num_balls do
-        self.ball_buttons[i] = self.ball_button_table:getButtonById("ball_" .. i)
-    end
-    return self.ball_button_table
-end
-
-function BalanceScreen:_ballLabel(i)
-    local st = self.board:getBallState(i)
-    if st == 1 then return "L:" .. i
-    elseif st == 2 then return "R:" .. i
-    else return tostring(i) end
-end
-
-function BalanceScreen:_refreshBallButtons()
-    if not self.ball_buttons then return end
-    for i, btn in ipairs(self.ball_buttons) do
-        if btn then
-            btn:setText(self:_ballLabel(i), btn.width)
-        end
-    end
-end
-
-function BalanceScreen:_buildHistoryText()
-    local lines = {}
-    for i, h in ipairs(self.board.history) do
-        local ls = table.concat(h.left,  ",")
-        local rs = table.concat(h.right, ",")
-        local sym = h.result == "L" and "<" or (h.result == "R" and ">" or "=")
-        lines[#lines + 1] = string.format("#%d: [%s] %s [%s]", i, ls, sym, rs)
-    end
-    return #lines > 0 and table.concat(lines, "  ") or _("No weighings yet")
 end
 
 -- ---------------------------------------------------------------------------
@@ -245,16 +161,20 @@ function BalanceScreen:onWeigh()
         return
     end
     self.board_widget:refresh()
-    if self.hist_text then
-        self.hist_text:setText(self:_buildHistoryText())
-    end
+    self:updateStatus()
+    self.plugin:saveState(self.board:serialize())
+end
+
+function BalanceScreen:onBallTap(ball)
+    if self.board.won or self.board.lost then return end
+    self.board:cycleBall(ball)
+    self.board_widget:refresh()
     self:updateStatus()
     self.plugin:saveState(self.board:serialize())
 end
 
 function BalanceScreen:onClearPans()
     self.board:clearPans()
-    self:_refreshBallButtons()
     self.board_widget:refresh()
     self:updateStatus()
     self.plugin:saveState(self.board:serialize())
@@ -349,12 +269,19 @@ function BalanceScreen:updateStatus(msg)
         status = T(_("Game over. Odd ball was #%1 (%2)."), self.board.odd_ball,
             self.board.odd_heavier and _("heavier") or _("lighter"))
     else
-        status = T(_("Weighings: %1/%2"), self.board.weighings_used, self.board.max_weighings)
-        local lc = #self.board.left_pan
-        local rc = #self.board.right_pan
-        if lc > 0 or rc > 0 then
-            status = status .. T(_(" | L:%1 R:%2"), lc, rc)
+        local count = T(_("Weighings: %1/%2"), self.board.weighings_used, self.board.max_weighings)
+        local result = self.board:currentResult()
+        local lead
+        if result == "L" then
+            lead = _("Left pan is heavier")
+        elseif result == "R" then
+            lead = _("Right pan is heavier")
+        elseif result == "=" then
+            lead = _("The pans balance")
+        elseif #self.board.history == 0 and #self.board.left_pan == 0 and #self.board.right_pan == 0 then
+            lead = _("Tap a ball: left pan, right pan, back")
         end
+        status = lead and (lead .. "  ·  " .. count) or count
     end
     ScreenBase.updateStatus(self, status)
 end

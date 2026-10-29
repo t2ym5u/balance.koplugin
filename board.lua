@@ -137,6 +137,24 @@ function BalanceBoard:weigh()
     return result
 end
 
+-- Result of the last weighing while the pans still hold exactly what was
+-- weighed; nil once anything has been moved (or before the first weighing).
+function BalanceBoard:currentResult()
+    local last = self.history[#self.history]
+    if not last then return nil end
+    local function same(a, b)
+        if #a ~= #b then return false end
+        local set = {}
+        for _, v in ipairs(a) do set[v] = true end
+        for _, v in ipairs(b) do if not set[v] then return false end end
+        return true
+    end
+    if same(last.left, self.left_pan) and same(last.right, self.right_pan) then
+        return last.result
+    end
+    return nil
+end
+
 -- Returns true when the player has used all allowed weighings.
 function BalanceBoard:weighingsExhausted()
     return self.weighings_used >= self.max_weighings
