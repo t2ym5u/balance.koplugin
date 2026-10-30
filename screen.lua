@@ -7,8 +7,6 @@ local function lrequire(name)
     return package.loaded[key]
 end
 
-local ButtonTable     = require("ui/widget/buttontable")
-local Device          = require("device")
 local HorizontalGroup = require("ui/widget/horizontalgroup")
 local HorizontalSpan  = require("ui/widget/horizontalspan")
 local Size            = require("ui/size")
@@ -22,8 +20,6 @@ local ScreenBase         = require("screen_base")
 local MenuHelper         = require("menu_helper")
 local BalanceBoard       = lrequire("board")
 local BalanceBoardWidget = lrequire("board_widget")
-
-local DeviceScreen = Device.screen
 
 local GAME_RULES_EN = _([[
 Balance Puzzle — Rules
@@ -76,50 +72,33 @@ end
 -- ---------------------------------------------------------------------------
 
 function BalanceScreen:buildLayout()
-    local sw           = DeviceScreen:getWidth()
-    local sh           = DeviceScreen:getHeight()
     local is_landscape = self:isLandscape()
-    local pad          = Size.padding.large
 
     local title_bar = self:buildTitleBar(_("Balance"), function()
         return {
             { text = _("New game"),               callback = function() self:onNewGame() end },
-            { text = self:getPresetButtonText(),  callback = function() self:openPresetMenu() end },
+            { text = T(_("Difficulty: %1"), self:getPresetButtonText()),
+              callback = function() self:openPresetMenu() end },
             self:makeRulesButtonConfig(GAME_RULES_EN, GAME_RULES_FR),
         }
     end)
 
-    local footer_w = is_landscape and math.floor(sw * 0.34) or (sw - 2 * pad)
-
-    local action_buttons = ButtonTable:new{
-        width   = footer_w,
-        buttons = {{
-            { text = _("Weigh"),      callback = function() self:onWeigh() end },
-            { text = _("Clear Pans"), callback = function() self:onClearPans() end },
-            { text = _("Guess"),      callback = function() self:onGuess() end },
-        }},
-    }
-
+    local footer_w = self:getControlsWidth()
     self.status_text:setMaxWidth(footer_w)
 
     local footer = VerticalGroup:new{
         align = "center",
         self.status_text,
         VerticalSpan:new{ width = Size.span.vertical_large },
-        action_buttons,
-        VerticalSpan:new{ width = pad },
+        self:buildActionBar({
+            { text = _("Weigh"),      callback = function() self:onWeigh() end },
+            { text = _("Clear Pans"), callback = function() self:onClearPans() end },
+            { text = _("Guess"),      callback = function() self:onGuess() end },
+        }),
     }
 
     -- The board takes every pixel the title bar and footer leave over.
-    local avail_h = sh - title_bar:getSize().h
-    local board_w, board_h
-    if is_landscape then
-        board_w = sw - footer_w - 3 * pad
-        board_h = avail_h - 2 * pad
-    else
-        board_w = sw - 2 * pad
-        board_h = avail_h - footer:getSize().h - 2 * pad
-    end
+    local board_w, board_h = self:getBoardBudget(title_bar, footer)
 
     self.board_widget = BalanceBoardWidget:new{
         board       = self.board,
@@ -132,12 +111,13 @@ function BalanceScreen:buildLayout()
         local content = HorizontalGroup:new{
             align  = "center",
             self.board_widget,
-            HorizontalSpan:new{ width = pad },
+            HorizontalSpan:new{ width = self:getGutter() },
             footer,
         }
         self:buildLandscapeLayout(title_bar, content)
     else
-        self:buildPortraitLayout(title_bar, self.board_widget, footer)
+        self:buildPortraitLayout(title_bar, self.board_widget,
+            VerticalGroup:new{ align = "center", footer, VerticalSpan:new{ width = self:getGutter() } })
     end
     self:updateStatus()
 end
@@ -208,6 +188,7 @@ function BalanceScreen:onGuess()
                 on_select  = function(heavier)
                     local correct = self.board:makeGuess(ball, heavier)
                     self:updateStatus()
+                    self:refreshActionBar()
                     if correct then
                         self:showMessage(T(_("Correct! Ball %1 was %2."), ball,
                             heavier and _("heavier") or _("lighter")), 4)
@@ -222,6 +203,10 @@ function BalanceScreen:onGuess()
     }
 end
 
+function BalanceScreen:isRoundOver()
+    return (self.board.won or self.board.lost) and true or false
+end
+
 function BalanceScreen:onNewGame()
     local preset = self.plugin:getSetting("preset", "easy")
     self.board   = BalanceBoard:new{ preset = preset }
@@ -232,16 +217,16 @@ end
 
 function BalanceScreen:openPresetMenu()
     local items = {}
-    for _, id in ipairs(BalanceBoard.PRESET_ORDER) do
+    for _i, id in ipairs(BalanceBoard.PRESET_ORDER) do
         local cfg = BalanceBoard.PRESETS[id]
         items[#items + 1] = {
             id   = id,
-            text = string.format("%s (%d balls, %d weighings)",
-                id:sub(1,1):upper() .. id:sub(2), cfg.num_balls, cfg.max_weighings),
+            text = T(_("%1 (%2 balls, %3 weighings)"),
+                MenuHelper.DIFFICULTY_LABELS[id] or id, cfg.num_balls, cfg.max_weighings),
         }
     end
     MenuHelper.openSizeMenu{
-        title     = _("Select difficulty"),
+        title     = _("Difficulty"),
         sizes     = items,
         current   = self.plugin:getSetting("preset", "easy"),
         parent    = self,
@@ -281,14 +266,14 @@ function BalanceScreen:updateStatus(msg)
         elseif #self.board.history == 0 and #self.board.left_pan == 0 and #self.board.right_pan == 0 then
             lead = _("Tap a ball: left pan, right pan, back")
         end
-        status = lead and (lead .. "  ·  " .. count) or count
+        status = self:joinStatus(lead, count)
     end
     ScreenBase.updateStatus(self, status)
 end
 
 function BalanceScreen:getPresetButtonText()
     local preset = self.plugin:getSetting("preset", "easy")
-    return preset:sub(1,1):upper() .. preset:sub(2)
+    return MenuHelper.DIFFICULTY_LABELS[preset] or preset
 end
 
 return BalanceScreen
