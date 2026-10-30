@@ -6,6 +6,20 @@ Reconstructed from this repository's git history: each release lists the
 feature and fix commits it carried. Version bumps, screenshot additions
 and CI syncs are left out.
 
+## [1.3.0] - 2026-10-30
+
+### Changed
+- The board and controls use the shared layout: a full-width action bar, the
+  scale filling the room it leaves, and a status line that wraps in landscape
+  instead of being cut off.
+- The difficulty entry in the title-bar menu reads "Difficulty: Easy".
+- Once the game is won or lost, the action bar shows "New game" in place of
+  Weigh / Clear Pans / Guess.
+
+### Fixed
+- The difficulty names (in the menu and in the "Easy (6 balls, 2 weighings)"
+  picker) were always English: they are now translated.
+
 ## [1.2.0] - 2026-10-29
 
 ### Changed

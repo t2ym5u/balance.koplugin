@@ -26,4 +26,5 @@ return {
     ["Right pan is heavier"]                = { fr = "Le plateau droit est plus lourd", es = "El platillo derecho pesa más", de = "Die rechte Schale ist schwerer" },
     ["The pans balance"]                    = { fr = "Les plateaux sont à l'équilibre", es = "Los platillos están equilibrados", de = "Die Schalen sind im Gleichgewicht" },
     ["Tap a ball: left pan, right pan, back"] = { fr = "Touchez une bille : gauche, droite, retour", es = "Toca una bola: izquierda, derecha, volver", de = "Kugel antippen: links, rechts, zurück" },
+    ["%1 (%2 balls, %3 weighings)"] = { fr = "%1 (%2 billes, %3 pesées)", es = "%1 (%2 bolas, %3 pesadas)", de = "%1 (%2 Kugeln, %3 Wägungen)" },
 }
