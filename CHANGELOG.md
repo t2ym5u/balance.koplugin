@@ -6,6 +6,13 @@ Reconstructed from this repository's git history: each release lists the
 feature and fix commits it carried. Version bumps, screenshot additions
 and CI syncs are left out.
 
+## [1.3.6] - 2026-11-05
+
+### Fixed
+- Removed the unused "hard" preset, which was the same as Medium and never
+  offered in the menu. A saved game or setting that still names it plays
+  as Medium.
+
 ## [1.3.5] - 2026-11-04
 
 ### Fixed

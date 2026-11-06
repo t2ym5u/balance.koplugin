@@ -272,7 +272,9 @@ function BalanceScreen:updateStatus(msg)
 end
 
 function BalanceScreen:getPresetButtonText()
-    local preset = self.plugin:getSetting("preset", "easy")
+    -- The board's preset, not the raw setting: a setting left at the old
+    -- "hard" plays (and so reads) as Medium.
+    local preset = self.board and self.board.preset or self.plugin:getSetting("preset", "easy")
     return MenuHelper.DIFFICULTY_LABELS[preset] or preset
 end
 
