@@ -8,13 +8,20 @@ BalanceBoard.__index = BalanceBoard
 local PRESETS = {
     easy   = { num_balls = 8,  max_weighings = 3 },
     medium = { num_balls = 12, max_weighings = 3 },
-    hard   = { num_balls = 12, max_weighings = 3 },  -- same size, less info given
 }
+
+-- A "hard" preset used to exist, identical to medium and never offered in
+-- the menu. A save or setting that still names it plays as medium.
+local function knownPreset(preset)
+    if PRESETS[preset] then return preset end
+    if preset == "hard" then return "medium" end
+    return "easy"
+end
 
 function BalanceBoard:new(opts)
     opts = opts or {}
-    local preset = opts.preset or "easy"
-    local cfg    = PRESETS[preset] or PRESETS.easy
+    local preset = knownPreset(opts.preset or "easy")
+    local cfg    = PRESETS[preset]
     local o = setmetatable({}, self)
     o.preset         = preset
     o.num_balls      = cfg.num_balls
@@ -36,8 +43,9 @@ end
 
 function BalanceBoard:newGame(preset)
     if preset then
+        preset = knownPreset(preset)
         self.preset = preset
-        local cfg = PRESETS[preset] or PRESETS.easy
+        local cfg = PRESETS[preset]
         self.num_balls     = cfg.num_balls
         self.max_weighings = cfg.max_weighings
         self.balls = {}
@@ -208,7 +216,7 @@ end
 
 function BalanceBoard:load(data)
     if type(data) ~= "table" or not data.odd_ball then return false end
-    self.preset         = data.preset        or "easy"
+    self.preset         = knownPreset(data.preset or "easy")
     self.num_balls      = data.num_balls     or 8
     self.max_weighings  = data.max_weighings or 3
     self.balls = {}

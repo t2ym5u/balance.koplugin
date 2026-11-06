@@ -30,6 +30,31 @@ describe("BalanceBoard", function()
             b:newGame("medium")
             assert.are.equal(12, b.num_balls)
         end)
+
+        it("offers easy and medium only, each a real preset", function()
+            assert.are.same({ "easy", "medium" }, Board.PRESET_ORDER)
+            for _, id in ipairs(Board.PRESET_ORDER) do assert.truthy(Board.PRESETS[id]) end
+            assert.is_nil(Board.PRESETS.hard)
+        end)
+
+        it("plays the retired hard preset as medium", function()
+            local b = Board:new{ preset = "hard" }
+            assert.are.equal("medium", b.preset)
+            assert.are.equal(12, b.num_balls)
+            b:newGame("hard")
+            assert.are.equal("medium", b.preset)
+        end)
+
+        it("still loads a save made with the hard preset", function()
+            local b = Board:new{ preset = "medium" }
+            local data = b:serialize()
+            data.preset = "hard"
+            local b2 = Board:new()
+            assert.is_true(b2:load(data))
+            assert.are.equal("medium", b2.preset)
+            assert.are.equal(12, b2.num_balls)
+            assert.are.equal(data.odd_ball, b2.odd_ball)
+        end)
     end)
 
     describe("cycleBall", function()
