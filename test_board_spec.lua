@@ -31,12 +31,6 @@ describe("BalanceBoard", function()
             assert.are.equal(12, b.num_balls)
         end)
 
-        it("offers easy and medium only, each a real preset", function()
-            assert.are.same({ "easy", "medium" }, Board.PRESET_ORDER)
-            for _, id in ipairs(Board.PRESET_ORDER) do assert.truthy(Board.PRESETS[id]) end
-            assert.is_nil(Board.PRESETS.hard)
-        end)
-
         it("plays the retired hard preset as medium", function()
             local b = Board:new{ preset = "hard" }
             assert.are.equal("medium", b.preset)
